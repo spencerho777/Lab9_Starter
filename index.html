@@ -1,26 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lab 9</title>
-
   <style>
     button {
       margin: 3px;
     }
-
     button:hover {
       cursor: pointer;
     }
-
     #first-num,
     #second-num {
       width: 60px;
     }
-
     output {
       border: 1px solid gray;
       display: block;
@@ -29,26 +24,18 @@
       padding: 5px;
       width: 240px;
     }
-
     main {
       width: 800px;
     }
-
     #error-btns {
-      column-gap: 5px;
-      display: flex;
       flex-wrap: wrap;
-      margin-top: 30px;
+      margin-top: 20px;
       row-gap: 5px;
-    }
-
-    #error-btns>* {
-      padding: 8px 2px;
-      width: 122px;
+      column-gap: 3px;
+      display: flex;
     }
   </style>
 </head>
-
 <body>
   <main>
     <form>
@@ -69,40 +56,86 @@
     </form>
 
     <section id="error-btns">
-      <button>Console Log</button>
-      <button>Console Error</button>
-      <button>Console Count</button>
-      <button>Console Warn</button>
-      <button>Console Assert</button>
-      <button>Console Clear</button>
-      <button>Console Dir</button>
-      <button>Console dirxml</button>
-      <button>Console Group Start</button>
-      <button>Console Group End</button>
-      <button>Console Table</button>
-      <button>Start Timer</button>
-      <button>End Timer</button>
-      <button>Console Trace</button>
-      <button>Trigger a Global Error</button>
+      <button class="log">Console Log</button>
+      <button class="error">Console Error</button>
+      <button class="count">Console Count</button>
+      <button class="warn">Console Warn</button>
+      <button class="assert">Console Assert</button>
+      <button class="clear">Console Clear</button>
+      <button class="dir">Console Dir</button>
+      <button class="dirxml">Console dirxml</button>
+      <button class="group">Console Group Start</button>
+      <button class="groupEnd">Console Group End</button>
+      <button class="table">Console Table</button>
+      <button class="startTimer">Start Timer</button>
+      <button class="endTimer">End Timer</button>
+      <button class="trace">Console Trace</button>
+      <button class="triggerError">Trigger a Global Error</button>
     </section>
   </main>
 
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
   <script>
-    let form = document.querySelector('form');
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      let output = document.querySelector('output');
-      let firstNum = document.querySelector('#first-num').value;
-      let secondNum = document.querySelector('#second-num').value;
-      let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+    window.TrackJS && TrackJS.install({ 
+      token: "1347c03a3bc84e9d9eae9468334fdbd6"
+      // for more configuration options, see https://docs.trackjs.com
     });
 
-    let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
+    class DivisionByZeroError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "DivisionByZeroError";
+      }
+    }
 
-    // Start your code here
-    // You may move this JS to another file if you wish
+    document.addEventListener('DOMContentLoaded', () => {
+      let form = document.querySelector('form');
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        let output = document.querySelector('output');
+        let firstNum = document.querySelector('#first-num').value;
+        let secondNum = document.querySelector('#second-num').value;
+        let operator = document.querySelector('#operator').value;
+        try {
+          if (operator === '/' && secondNum == '0') {
+            throw new DivisionByZeroError('Division by zero is not allowed.');
+          }
+          output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+        } catch (error) {
+          console.error('An error occurred: ', error);
+          output.innerHTML = error.message;
+        } finally {
+          console.log('Calculation attempted.');
+        }
+      });
+
+      document.getElementsByClassName('log')[0].addEventListener('click', () => console.log('Console Log Demo'));
+      document.getElementsByClassName('error')[0].addEventListener('click', () => console.error('Console Error Demo'));
+      document.getElementsByClassName('count')[0].addEventListener('click', () => console.count('Console Count Demo'));
+      document.getElementsByClassName('warn')[0].addEventListener('click', () => console.warn('Console Warn Demo'));
+      document.getElementsByClassName('assert')[0].addEventListener('click', () => console.assert(false, 'Console Assert Demo'));
+      document.getElementsByClassName('clear')[0].addEventListener('click', () => console.clear());
+      document.getElementsByClassName('dir')[0].addEventListener('click', () => console.dir(document.body));
+      document.getElementsByClassName('dirxml')[0].addEventListener('click', () => console.dirxml(document));
+      document.getElementsByClassName('group')[0].addEventListener('click', () => {
+        console.group('Console Group');
+        console.log('Inside Group');
+      });
+      document.getElementsByClassName('groupEnd')[0].addEventListener('click', () => console.groupEnd('Console Group'));
+      document.getElementsByClassName('table')[0].addEventListener('click', () => console.table([{a:1, b:'Y'}, {a:2, b:'Z'}]));
+      document.getElementsByClassName('startTimer')[0].addEventListener('click', () => console.time('Timer'));
+      document.getElementsByClassName('endTimer')[0].addEventListener('click', () => console.timeEnd('Timer'));
+      document.getElementsByClassName('trace')[0].addEventListener('click', () => console.trace('Console Trace Demo'));
+      document.getElementsByClassName('triggerError')[0].addEventListener('click', () => {
+        // Triggering a global error
+        nonExistentFunction();
+      });
+
+      // Global error handler
+      window.onerror = function (message, source, lineno, colno, error) {
+        console.log(`Global Error caught: ${message} at ${source}:${lineno}:${colno}`);
+      };
+    });
   </script>
 </body>
-
 </html>
